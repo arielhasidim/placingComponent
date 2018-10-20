@@ -1,5 +1,4 @@
 import {AfterContentInit, AfterViewInit, Component, Input, OnChanges, OnInit} from '@angular/core';
-import {FeatureCollection, GeoJson} from '../../../model/map';
 
 @Component({
   selector: 'app-govmap-placing',
@@ -12,16 +11,11 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
   constructor() {
 
   }
-
-  ngOnInit() {
-
-      }
     
     ngAfterViewInit() {
-
     }
-    ngOnChanges (change) {
 
+    ngOnChanges (change) {
     }
     
 
@@ -32,7 +26,6 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
 
         token: "1f3f77a5-064f-46f6-941e-f9eb8a3c09b2",
         showXY: true,
-        identifyOnClick: true,
         bgButton: 0,
         zoomButtons: 0,
         identifyOnClick: 0,
