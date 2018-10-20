@@ -11,17 +11,16 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
   constructor() {
 
   }
-    
+
     ngAfterViewInit() {
     }
 
     ngOnChanges (change) {
     }
-    
+
 
   ngOnInit() {
     var DocumentReady = function(){
-    var govmap = window.govmap
     govmap.createMap('map', {
 
         token: "1f3f77a5-064f-46f6-941e-f9eb8a3c09b2",
