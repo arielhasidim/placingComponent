@@ -7,7 +7,9 @@ import {AfterContentInit, AfterViewInit, Component, Input, OnChanges, OnInit, Vi
 })
 export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges {
 @ViewChild('pin') pin;
-
+@Input() lat = '32.5';
+@Input() lng = '35';
+myMap;
     constructor() {
 
     }
@@ -20,15 +22,14 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
 
 
     ngOnInit() {
-
-        window['govmap'].createMap('map', {
-
+       this.myMap =   window['govmap'].createMap('map', {
             token: '1f3f77a5-064f-46f6-941e-f9eb8a3c09b2',
             showXY: true,
-            bgButton: 1,
+            bgButton: 0,
             zoomButtons: 1,
-            identifyOnClick: 1,
+            identifyOnClick: 0,
             layersMode: 4,
+            scroll: 1,
             onLoad: this.startMap.bind(this)
         });
 
@@ -36,16 +37,7 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
     }
 
     startMap() {
-        const options = {
-            enableHighAccuracy: true,
-            timeout: 50000000,
-            maximumAge: 0
-        };
-
-
-        navigator.geolocation.getCurrentPosition((pos) => {
-            const crd = pos.coords;
-            const israelCoords = this.WgsToIsrael(crd.latitude, crd.longitude);
+            const israelCoords = this.WgsToIsrael(this.lat, this.lng);
             const params = {
                 x: israelCoords[0],
                 y: israelCoords[1],
@@ -53,12 +45,7 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
             };
             window['govmap'].zoomToXY(params);
             window['govmap'].setBackground(2);
-            // document.getElementById('pin').classList.remove('hide');
-        }, (err) => {
-            console.warn(`ERROR(${err.code}): ${err.message}`);
-        }, options);
-        window['govmap'].setBackground(2);
-
+            this.pin.nativeElement.classList.remove('hide');
     }
 
 
