@@ -55,7 +55,7 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
         const israelCoords = this.WgsToIsrael(this.lat, this.lng);
         console.log(israelCoords);
 
-        const wgsCoords = this.IsraelToWgs(israelCoords[1], israelCoords[0]);
+        const wgsCoords = this.IsraelToWgs(israelCoords[0], israelCoords[1]);
         console.log(wgsCoords);
 
         const params = {
@@ -139,9 +139,9 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
 
     ///////////////NEW ITM TO WGS FUNCTION//////////////
 
-    IsraelToWgs(N, E)  {
+    IsraelToWgs(E, N)  {
         // 1. Local Grid (ITM) -&gt; GRS80
-        const latlon80array = this.Grid2LatLon(N, E, 'ITM', 'GRS80');
+        const latlon80array = this.Grid2LatLon(E, N, 'ITM', 'GRS80');
         const lat80 = latlon80array[0];
         const lon80 = latlon80array[1];
 
@@ -157,7 +157,7 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
         return [lat, lon];
     }
 
-    Grid2LatLon(N, E, from, to) {
+    Grid2LatLon(E, N, from, to) {
         //================
         // GRID -&gt; Lat/Lon
         //================
