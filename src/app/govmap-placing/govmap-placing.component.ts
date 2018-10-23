@@ -9,6 +9,7 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
     @ViewChild('pin') pin;
     @Input() lat = '32.5';
     @Input() lng = '35';
+    @Input() accuRadius = 50;
 
     DatumList = {
         WGS84: {a: 6378137.0, b: 6356752.3142, f: 0.00335281066474748, esq: 0.006694380004260807, e: 0.0818191909289062,
@@ -64,10 +65,54 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
             level: 10
         };
         window['govmap'].zoomToXY(params);
+        const data ={
+            circleGeometries : [{ x: israelCoords[0], y: israelCoords[1], radius: this.accuRadius }],
+            geometryType: 4,
+            defaultSymbol:
+            {
+                outlineColor: [255, 0, 0, 1],
+                outlineWidth: 2,
+                fillColor: [255, 255, 0, 0]
+            },
+            symbols: [],
+            clearExisting: true,
+            data: {
+                tooltips: [],
+                headers: [],
+                bubbles: [],
+                bubbleUrl: ''
+            }
+        };
+        window['govmap'].displayGeometries(data).then(function (response) {
+          console.log(response.data);
+        });
+        
+        window['govmap'].onEvent(window['govmap'].events.PAN).progress(function(e) {
+            const x = (e.extent.xmax + e.extent.xmin) / 2;
+            const y = (e.extent.ymax + e.extent.ymin) / 2;
+            const distance = Math.sqrt((israelCoords[0] - x)*(israelCoords[0] - x) + (israelCoords[1] - y)*(israelCoords[1] - y));
+            // console.log(distance);
+            // compare distance to accRadius (not in scope now)
+            if (distance > 50) {
+                // console.log('out');
+                // create better solution then timeout
+                // bring the map to the closest edge of the circle
+                setTimeout(function(){ window['govmap'].zoomToXY(params); }, 1000);
+            }
+        });
         window['govmap'].setBackground(2);
         this.pin.nativeElement.classList.remove('hide');
+
+        window['govmap'].displayGeometries(data).then(function (response) {
+            console.log(response.data);
+        });
     }
 
+    checkradius(response) {
+        const x = response.extent.xmax - response.extent.xmax;
+        const y = response.extent.ymax - response.extent.ymax;
+        console.log([x, y]);
+    }
 
     //////////////////////////////////////////
     // convert wgs84 to israel tm grid...
