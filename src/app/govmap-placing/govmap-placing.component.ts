@@ -62,15 +62,17 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
         console.log([this.lat, this.lng]);
 
         const israelCoords = this.WgsToIsrael(this.lat, this.lng);
+        const israeliCoordsImprovedAcc = [israelCoords[0] - 6, israelCoords[1] + 4]
         console.log(israelCoords);
 
 
 
         const params = {
-            x: israelCoords[0] - 6,
-            y: israelCoords[1] + 4,
+            x: israeliCoordsImprovedAcc[0],
+            y: israeliCoordsImprovedAcc[1],
             level: 10
         };
+
         window['govmap'].zoomToXY(params);
         const data = {
             circleGeometries: [{x: params.x, y: params.y, radius: this.accuRadius}],
@@ -97,10 +99,12 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
         window['govmap'].onEvent(window['govmap'].events.PAN).progress( (e) => {
             const x = (e.extent.xmax + e.extent.xmin) / 2;
             const y = (e.extent.ymax + e.extent.ymin) / 2;
-            const distance = Math.sqrt((israelCoords[0] - x) * (israelCoords[0] - x) + (israelCoords[1] - y) * (israelCoords[1] - y));
+            const distance = Math.sqrt((israeliCoordsImprovedAcc[0] - x) * (israeliCoordsImprovedAcc[0] - x) +
+            (israeliCoordsImprovedAcc[1] - y) * (israeliCoordsImprovedAcc[1] - y));
 
             const newWGS = this.IsraelToWgs(x - 7 , y - 9 );
             console.log(newWGS);
+            console.log(distance);
 
             // compare distance to accRadius (not in scope now)
             // if (distance > 50) {
