@@ -48,10 +48,10 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
             token: '1f3f77a5-064f-46f6-941e-f9eb8a3c09b2',
             showXY: true,
             bgButton: 0,
-            zoomButtons: 1,
+            zoomButtons: 0,
             identifyOnClick: 0,
             layersMode: 4,
-            scroll: 1,
+            scroll: 0,
             onLoad: this.startMap.bind(this)
         });
 
@@ -73,7 +73,7 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
         };
         window['govmap'].zoomToXY(params);
         const data = {
-            circleGeometries: [{x: israelCoords[0], y: israelCoords[1], radius: this.accuRadius}],
+            circleGeometries: [{x: params.x, y: params.y, radius: this.accuRadius}],
             geometryType: 4,
             defaultSymbol:
                 {
@@ -103,14 +103,14 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
             console.log(newWGS);
 
             // compare distance to accRadius (not in scope now)
-            if (distance > 50) {
-                // console.log('out');
-                // create better solution then timeout
-                // bring the map to the closest edge of the circle
-                setTimeout(function () {
-                    window['govmap'].zoomToXY(params);
-                }, 1000);
-            }
+            // if (distance > 50) {
+            //     // console.log('out');
+            //     // create better solution then timeout
+            //     // bring the map to the closest edge of the circle
+            //     setTimeout(function () {
+            //         window['govmap'].zoomToXY(params);
+            //     }, 1000);
+            // }
         });
         window['govmap'].setBackground(2);
         this.pin.nativeElement.classList.remove('hide');
