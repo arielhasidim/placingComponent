@@ -7,17 +7,23 @@ import {AfterContentInit, AfterViewInit, Component, Input, OnChanges, OnInit, Vi
 })
 export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges {
     @ViewChild('pin') pin;
-    @Input() lat = '32.5';
-    @Input() lng = '35';
+    @Input() lat = '29.526201';
+    @Input() lng = '34.933629';
     @Input() accuRadius = 50;
 
     DatumList = {
-        WGS84: {a: 6378137.0, b: 6356752.3142, f: 0.00335281066474748, esq: 0.006694380004260807, e: 0.0818191909289062,
-            dX: 0, dY: 0, dZ: 0},
-        GRS80: {a: 6378137.0, b: 6356752.3141, f: 0.0033528106811823, esq: 0.00669438002290272, e: 0.0818191910428276,
-            dX: -48, dY: 55, dZ: 52},
-        Clark1880: {a: 6378300.789, b: 6356566.4116309, f: 0.003407549767264, esq: 0.006803488139112318, e: 0.08248325975076590,
-            dX: 0, dY: 0, dZ: 0}
+        WGS84: {
+            a: 6378137.0, b: 6356752.3142, f: 0.00335281066474748, esq: 0.006694380004260807, e: 0.0818191909289062,
+            dX: 0, dY: 0, dZ: 0
+        },
+        GRS80: {
+            a: 6378137.0, b: 6356752.3141, f: 0.0033528106811823, esq: 0.00669438002290272, e: 0.0818191910428276,
+            dX: -48, dY: 55, dZ: 52
+        },
+        Clark1880: {
+            a: 6378300.789, b: 6356566.4116309, f: 0.003407549767264, esq: 0.006803488139112318, e: 0.08248325975076590,
+            dX: 0, dY: 0, dZ: 0
+        }
     };
 
     GridList = {
@@ -25,14 +31,16 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
         ITM: {lon0: 0.61443473225468920, lat0: 0.55386965463774187, k0: 1.0000067, false_e: 219529.584, false_n: 2885516.9488}
     };
     myMap;
-    
+
     constructor() {
 
     }
 
-    ngAfterViewInit() {}
+    ngAfterViewInit() {
+    }
 
-    ngOnChanges(change) {}
+    ngOnChanges(change) {
+    }
 
 
     ngOnInit() {
@@ -52,28 +60,27 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
 
     startMap() {
         console.log([this.lat, this.lng]);
-        
+
         const israelCoords = this.WgsToIsrael(this.lat, this.lng);
         console.log(israelCoords);
 
-        const wgsCoords = this.IsraelToWgs(israelCoords[0], israelCoords[1]);
-        console.log(wgsCoords);
+
 
         const params = {
-            x: israelCoords[0],
-            y: israelCoords[1],
+            x: israelCoords[0] - 6,
+            y: israelCoords[1] + 4,
             level: 10
         };
         window['govmap'].zoomToXY(params);
-        const data ={
-            circleGeometries : [{ x: israelCoords[0], y: israelCoords[1], radius: this.accuRadius }],
+        const data = {
+            circleGeometries: [{x: israelCoords[0], y: israelCoords[1], radius: this.accuRadius}],
             geometryType: 4,
             defaultSymbol:
-            {
-                outlineColor: [255, 0, 0, 1],
-                outlineWidth: 2,
-                fillColor: [255, 255, 0, 0]
-            },
+                {
+                    outlineColor: [255, 0, 0, 1],
+                    outlineWidth: 2,
+                    fillColor: [255, 255, 0, 0]
+                },
             symbols: [],
             clearExisting: true,
             data: {
@@ -84,20 +91,25 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
             }
         };
         window['govmap'].displayGeometries(data).then(function (response) {
-          console.log(response.data);
+            console.log(response.data);
         });
-        
-        window['govmap'].onEvent(window['govmap'].events.PAN).progress(function(e) {
+
+        window['govmap'].onEvent(window['govmap'].events.PAN).progress( (e) => {
             const x = (e.extent.xmax + e.extent.xmin) / 2;
             const y = (e.extent.ymax + e.extent.ymin) / 2;
-            const distance = Math.sqrt((israelCoords[0] - x)*(israelCoords[0] - x) + (israelCoords[1] - y)*(israelCoords[1] - y));
-            // console.log(distance);
+            const distance = Math.sqrt((israelCoords[0] - x) * (israelCoords[0] - x) + (israelCoords[1] - y) * (israelCoords[1] - y));
+
+            const newWGS = this.IsraelToWgs(x - 7 , y - 9 );
+            console.log(newWGS);
+
             // compare distance to accRadius (not in scope now)
             if (distance > 50) {
                 // console.log('out');
                 // create better solution then timeout
                 // bring the map to the closest edge of the circle
-                setTimeout(function(){ window['govmap'].zoomToXY(params); }, 1000);
+                setTimeout(function () {
+                    window['govmap'].zoomToXY(params);
+                }, 1000);
             }
         });
         window['govmap'].setBackground(2);
@@ -138,7 +150,9 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
         return x * x * x * x;
     }
 
-    pi() { return 3.141592653589793; }
+    pi() {
+        return 3.141592653589793;
+    }
 
 
     WgsToIsrael(latitude, longitude) {
@@ -182,9 +196,9 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
         return [easting, northing];
     }
 
-    ///////////////NEW ITM TO WGS FUNCTION//////////////
+    /////////////// NEW ITM TO WGS FUNCTION //////////////
 
-    IsraelToWgs(E, N)  {
+    IsraelToWgs(E, N) {
         // 1. Local Grid (ITM) -&gt; GRS80
         const latlon80array = this.Grid2LatLon(E, N, 'ITM', 'GRS80');
         const lat80 = latlon80array[0];
@@ -203,9 +217,9 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
     }
 
     Grid2LatLon(E, N, from, to) {
-        //================
+        // ================
         // GRID -&gt; Lat/Lon
-        //================
+        // ================
 
         const y = N + this.GridList[from].false_n;
         const x = E - this.GridList[from].false_e;
@@ -283,8 +297,8 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
         const from_h = 0.0; // we're flat!
 
         const dlat = (-dX * slat * clon - dY * slat * slon + dZ * clat
-                        + da * rn * from_esq * slat * clat / from_a +
-                        +df * (rm * adb + rn / adb) * slat * clat) / (rm + from_h);
+            + da * rn * from_esq * slat * clat / from_a +
+            +df * (rm * adb + rn / adb) * slat * clat) / (rm + from_h);
 
         // result lat (radians)
         const olat = ilat + dlat;
@@ -293,9 +307,9 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
         const dlon = (-dX * slon + dY * clon) / ((rn + from_h) * clat);
         // result lon (radians)
         const olon = ilon + dlon;
-        
+
         return [olat, olon];
     }
 
-    
+
 }
