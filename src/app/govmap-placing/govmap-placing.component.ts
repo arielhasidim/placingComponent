@@ -7,8 +7,8 @@ import {AfterContentInit, AfterViewInit, Component, Input, OnChanges, OnInit, Vi
 })
 export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges {
     @ViewChild('pin') pin;
-    @Input() lat = '29.526201';
-    @Input() lng = '34.933629';
+    @Input() lat = '31.275159';
+    @Input() lng = '34.821244';
     @Input() accuRadius = 50;
 
     DatumList = {
@@ -45,7 +45,9 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
 
     ngOnInit() {
         this.myMap = window['govmap'].createMap('map', {
-            token: '1f3f77a5-064f-46f6-941e-f9eb8a3c09b2',
+            // token: '1f3f77a5-064f-46f6-941e-f9eb8a3c09b2',
+            // spical token for localhost:
+            token: '5a4b8472-b95b-4687-8179-0ccb621c7990',
             showXY: true,
             bgButton: 0,
             zoomButtons: 0,
@@ -62,10 +64,10 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
         console.log([this.lat, this.lng]);
 
         const israelCoords = this.WgsToIsrael(this.lat, this.lng);
-        const israeliCoordsImprovedAcc = [israelCoords[0] - 6, israelCoords[1] + 4]
+        const israeliCoordsImprovedAcc = [israelCoords[0] - 6, israelCoords[1] + 4];
         console.log(israelCoords);
 
-
+        this.getAddress(israeliCoordsImprovedAcc[0], israeliCoordsImprovedAcc[1]);
 
         const params = {
             x: israeliCoordsImprovedAcc[0],
@@ -74,6 +76,14 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
         };
 
         window['govmap'].zoomToXY(params);
+
+        this.trackDelta(params);
+
+        window['govmap'].setBackground(2);
+        this.pin.nativeElement.classList.remove('hide');
+    }
+
+    trackDelta(params) {
         const data = {
             circleGeometries: [{x: params.x, y: params.y, radius: this.accuRadius}],
             geometryType: 4,
@@ -93,18 +103,18 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
             }
         };
         window['govmap'].displayGeometries(data).then(function (response) {
-            console.log(response.data);
+            // console.log(response.data);
         });
 
         window['govmap'].onEvent(window['govmap'].events.PAN).progress( (e) => {
             const x = (e.extent.xmax + e.extent.xmin) / 2;
             const y = (e.extent.ymax + e.extent.ymin) / 2;
-            const distance = Math.sqrt((israeliCoordsImprovedAcc[0] - x) * (israeliCoordsImprovedAcc[0] - x) +
-            (israeliCoordsImprovedAcc[1] - y) * (israeliCoordsImprovedAcc[1] - y));
+            const distance = Math.sqrt((params.x - x) * (params.x - x) +
+            (params.y - y) * (params.y - y));
 
             const newWGS = this.IsraelToWgs(x - 7 , y - 9 );
-            console.log(newWGS);
-            console.log(distance);
+            // console.log(newWGS);
+            // console.log(distance);
 
             // compare distance to accRadius (not in scope now)
             // if (distance > 50) {
@@ -116,11 +126,30 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
             //     }, 1000);
             // }
         });
-        window['govmap'].setBackground(2);
-        this.pin.nativeElement.classList.remove('hide');
 
         window['govmap'].displayGeometries(data).then(function (response) {
-            console.log(response.data);
+            // console.log(response.data);
+        });
+    }
+
+    getAddress(xx, yy) {
+        const wkt = 'POINT (' + xx + ' ' + yy + ')';
+        const params = {
+            geometry: wkt,
+            layerName: 'PARCEL_ALL',
+            fields: ['GUSH_NUM', 'PARCEL']
+        };
+        window['govmap'].intersectFeatures(params).then(function (response) {
+            // console.log(response);
+
+            const params2 = {
+                type: window['govmap'].locateType.addressToLotParcel,
+                lot: response.data[0].Values[0],
+                parcel: response.data[0].Values[1]
+                };
+                window['govmap'].searchAndLocate(params2).then(function(response2) {
+                    console.log(response2);
+                });
         });
     }
 
@@ -285,7 +314,7 @@ export class GovmapPlacingComponent implements OnInit, AfterViewInit, OnChanges 
         const clon = Math.cos(ilon);
         const ssqlat = slat * slat;
 
-        //dlat = ((-dx * slat * clon - dy * slat * slon + dz * clat)
+        // dlat = ((-dx * slat * clon - dy * slat * slon + dz * clat)
         //        + (da * rn * from_esq * slat * clat / from_a)
         //        + (df * (rm * adb + rn / adb )* slat * clat))
         //       / (rm + from.h);
